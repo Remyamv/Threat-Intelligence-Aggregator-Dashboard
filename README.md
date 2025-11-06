@@ -48,9 +48,12 @@ pip install -r requirements.txt
 
 Create a file named `.env` and add:
 ```ini
+notepad .env
 ABUSEIPDB_API_KEY=your_api_key_here
 ```
 Get your free key from: https://www.abuseipdb.com/register
+
+Create an api key and paste it in `.env` file
 ### Step 5: Run the data fetcher
 ```css
 python main.py
