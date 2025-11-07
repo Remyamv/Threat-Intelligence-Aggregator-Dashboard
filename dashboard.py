@@ -38,7 +38,7 @@ if "history" not in st.session_state:
 
 
 st.set_page_config(page_title="Manual IP Reputation Checker", layout="centered")
-st.title("🛡 Manual IP Reputation Checker")
+st.title(" Manual IP Reputation Checker")
 
 ip_input = st.text_input("Enter IP address:")
 
@@ -52,11 +52,11 @@ if ip_input:
         score = result["abuseConfidenceScore"]
        
         if score >= 75:
-            color = "🔴 High Risk"
+            color = ":red[HIGH RISK]"
         elif score >= 40:
-            color = "🟠 Medium Risk"
+            color = ":orange[MEDIUM RISK]"
         else:
-            color = "🟢 Low Risk"
+            color = ":green[LOW RISK]"
         
         st.subheader(f"IP: {result['ip']} ({color})")
         st.write(f"**Abuse Confidence Score:** {score}%")
@@ -75,5 +75,5 @@ if ip_input:
 
 
 if st.session_state.history:
-    st.subheader("🕒 Recently Checked IPs")
+    st.subheader(" Recently Checked IPs")
     st.table(st.session_state.history[::-1]) 
