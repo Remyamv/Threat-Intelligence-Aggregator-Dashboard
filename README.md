@@ -1,4 +1,4 @@
-# Threat Intelligence Dashboard
+# Threat Intelligence Aggregator Dashboard
 
 The Threat Intelligence Aggregator Dashboard is a Python-based application that collects, analyzes, and visualizes threat data from multiple public sources.
 It helps cybersecurity analysts identify malicious IPs, and malware indicators in real time.
@@ -54,15 +54,8 @@ ABUSEIPDB_API_KEY=your_api_key_here
 Get your free key from: https://www.abuseipdb.com/register
 
 Create an api key and paste it in `.env` file
-### Step 5: Run the data fetcher
-```css
-python main.py
-```
-### Step 6: Analyze threat data
-```nginx
-python analyze_data.py
-```
-### Step 7: Launch dashboard
+
+### Step 5: Launch dashboard
 ```arduino
 streamlit run dashboard.py
 ```
