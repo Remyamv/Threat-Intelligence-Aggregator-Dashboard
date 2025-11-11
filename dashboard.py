@@ -1,79 +1,91 @@
 import streamlit as st
 import requests
-from dotenv import load_dotenv
-import os
-from datetime import datetime
+import pandas as pd
 
-
-load_dotenv()
-API_KEY = os.getenv("ABUSEIPDB_API_KEY")
-
-
-def check_ip(ip):
-    url = "https://api.abuseipdb.com/api/v2/check"
-    headers = {
-        "Accept": "application/json",
-        "Key": API_KEY
-    }
-    params = {
-        "ipAddress": ip,
-        "maxAgeInDays": 90
-    }
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code == 200:
-        data = response.json()["data"]
-        return {
-            "ip": ip,
-            "abuseConfidenceScore": data["abuseConfidenceScore"],
-            "country": data["countryCode"],
-            "totalReports": data["totalReports"],
-            "lastReported": data.get("lastReported", "N/A")
-        }
-    else:
-        return {"ip": ip, "error": f"HTTP {response.status_code}"}
-
+st.set_page_config(page_title="Threat Intelligence Dashboard", layout="wide")
+st.title(" Threat Intelligence Dashboard")
 
 if "history" not in st.session_state:
-    st.session_state.history = []
+    st.session_state["history"] = []
 
+ip = st.text_input("Enter IP address and press Enter:")
 
-st.set_page_config(page_title="Manual IP Reputation Checker", layout="centered")
-st.title(" Manual IP Reputation Checker")
-
-ip_input = st.text_input("Enter IP address:")
-
-if ip_input:
-    result = check_ip(ip_input)
-    
-    
-    if "error" in result:
-        st.error(f"{result['ip']} : {result['error']}")
-    else:
-        score = result["abuseConfidenceScore"]
-       
-        if score >= 75:
-            color = ":red[HIGH RISK]"
-        elif score >= 40:
-            color = ":orange[MEDIUM RISK]"
+if ip:
+    try:
+        response = requests.post("http://127.0.0.1:5000/check", json={"ip": ip})
+        if response.status_code == 200:
+            result = response.json()
+            st.session_state["history"].append(result)
         else:
-            color = ":green[LOW RISK]"
-        
-        st.subheader(f"IP: {result['ip']} ({color})")
-        st.write(f"**Abuse Confidence Score:** {score}%")
-        st.write(f"**Total Reports:** {result['totalReports']}")
-        st.write(f"**Country:** {result['country']}")
-        st.write(f"**Last Reported:** {result['lastReported']}")
-        
-        
-        st.session_state.history.append({
-            "IP": result["ip"],
-            "Score": score,
-            "Country": result["country"],
-            "Last Reported": result["lastReported"],
-            "Checked At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
+            st.error("Failed to connect to backend API.")
+    except Exception as e:
+        st.error(f"Connection error: {e}")
 
+if st.session_state["history"]:
+    st.markdown("---")
+    latest = st.session_state["history"][-1]
+    st.subheader(f"Results for **{latest['ip']}**")
 
-if st.session_state.history:
+    score = latest.get("abuse_score", 0)
+    if score >= 75:
+        risk_color = "#FF4C4C"
+        risk_label = "High Risk"
+    elif score >= 40:
+        risk_color = "#FFA500"
+        risk_label = "Medium Risk"
+    else:
+        risk_color = "#4CAF50"
+        risk_label = "Low Risk"
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown(f"""
+        <div style="background-color:{risk_color}; padding:15px; border-radius:10px;">
+            <h4 style="color:white;">AbuseIPDB</h4>
+            <p style="color:white;">Score: {score} ({risk_label})<br>
+            Country: {latest.get('country', 'Unknown')}<br>
+            Total Reports: {latest.get('total_reports', 'N/A')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(f"""
+        <div style="background-color:{risk_color}; padding:15px; border-radius:10px;">
+            <h4 style="color:white;">VirusTotal</h4>
+            <p style="color:white;">
+            Malicious: {latest.get('vt_malicious', 'N/A')}<br>
+            Suspicious: {latest.get('vt_suspicious', 'N/A')}<br>
+            Harmless: {latest.get('vt_harmless', 'N/A')}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f"""
+        <div style="background-color:{risk_color}; padding:15px; border-radius:10px;">
+            <h4 style="color:white;">WHOIS</h4>
+            <p style="color:white;">
+            Org: {latest.get('whois_org', 'N/A')}<br>
+            Country: {latest.get('whois_country', 'N/A')}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
     st.subheader(" Recently Checked IPs")
-    st.table(st.session_state.history[::-1]) 
+
+    df = pd.DataFrame(st.session_state["history"])
+    df.rename(columns={
+        "ip": "IP Address",
+        "abuse_score": "Abuse Score",
+        "vt_malicious": "VT Malicious",
+        "vt_suspicious": "VT Suspicious",
+        "vt_harmless": "VT Harmless",
+        "whois_org": "WHOIS Org",
+        "whois_country": "WHOIS Country",
+        "country": "Country",
+        "total_reports": "Total Reports"
+    }, inplace=True)
+
+    st.dataframe(df, use_container_width=True, hide_index=True)
