@@ -9,6 +9,7 @@ Built for SOC and threat intel teams, this project simplifies manual investigati
 ## Features
 
 - **Automatic Data Aggregation** — Fetches latest threat data from multiple public intelligence feeds.
+- **Flask Backend API** — Centralized Python backend that fetches and aggregates data from multiple sources (AbuseIPDB, VirusTotal, WHOIS).
 - **Data Analysis** – Extracts and summarizes malicious IPs, and malware samples.
 - **Automated Analysis** — Fetches and visualizes threat intelligence without manual effort
 - **Secure API Handling** — Uses `.env` for API key management (not exposed in code)
@@ -21,8 +22,9 @@ Built for SOC and threat intel teams, this project simplifies manual investigati
 | Component | Technology |
 |------------|-------------|
 | **Frontend** | Streamlit |
-| **Backend** | Python 3.x |
-| **Data sources** | AbuseIPDB, Feodo Tracker, URLHaus |
+| **Backend** | Flask |
+| **Programming Language** | Python 3.x |
+| **Data sources** | AbuseIPDB, VirusTotal, WHOIS |
 | **Environment** | dotenv for secure key storage |
 | **Visualization** | Streamlit Charts, Tables |
 
@@ -50,13 +52,23 @@ Create a file named `.env` and add:
 ```ini
 notepad .env
 ABUSEIPDB_API_KEY=your_api_key_here
+VIRUSTOTAL_API_KEY=your_virustotal_key
 ```
 Get your free key from: https://www.abuseipdb.com/register
 
+Get your VirusTotal key
+
 Create an api key and paste it in `.env` file
+
+### Start the Backend API
+```arduino
+python app.py
+```
+
+The Flask API will start locally on http://127.0.0.1:5000.
 
 ### Step 5: Launch dashboard
 ```arduino
 streamlit run dashboard.py
 ```
-
+Then open the local URL displayed in your terminal (usually http://localhost:8501).
