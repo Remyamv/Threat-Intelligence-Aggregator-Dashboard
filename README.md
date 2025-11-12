@@ -60,14 +60,15 @@ Get your VirusTotal key
 
 Create an api key and paste it in `.env` file
 
-### Start the Backend API
+### Step 5: Start the Backend API
 ```arduino
 python app.py
 ```
 
 The Flask API will start locally on http://127.0.0.1:5000.
 
-### Step 5: Launch dashboard
+### Step 6: Launch dashboard
+In anothor terminal:
 ```arduino
 streamlit run dashboard.py
 ```
